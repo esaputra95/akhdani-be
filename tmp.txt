@@ -1,0 +1,66 @@
+const getIsland = async (lat, lon) => {
+    const nominatimAPI = 'https://nominatim.openstreetmap.org/reverse';
+    try {
+        const response = await axios.get(nominatimAPI, {
+            params: {
+                format: 'json',
+                lat: lat,
+                lon: lon,
+            },
+        });
+    
+        if (response.data) {
+          return response.data;
+        } else {
+          return 'Pulau tidak ditemukan';
+        }
+      } catch (error) {
+          console.log({error});
+        throw new Error('Error Nominatim API');
+      }
+  }
+
+  const getIslandName = async (lat, lng) => {
+    const geocodingAPI = 'http://www.mapquestapi.com/geocoding/v1/reverse';
+  
+    try {
+      const response = await axios.get(geocodingAPI, {
+        params: {
+          key: 'zzQSlBSAX4B70n4FyzMDsUdV6KHyl7m7',
+          location: `${lat},${lng}`,
+          thumbMaps: false,
+          includeNearestIntersection: false,
+          includeRoadMetadata: false,
+        },
+      });
+      return response.data
+    } catch (error) {
+      return error
+    }
+  }
+
+// Definisikan route untuk pencarian nama kota di suatu negara
+app.get('/', async (req, res) => {
+  const country = 'Indonesia';
+  const geoNamesAPI = 'http://api.geonames.org/searchJSON';
+  const username = 'ekosaputra'; // Ganti dengan nama pengguna Anda di GeoNames
+
+
+  try {
+    const response = await axios.get(`http://api.geonames.org/searchJSON?formatted=true&q=Rokan&maxRows=20&username=ekosaputra&style=full`);
+    const cities = response.data.geonames.map(city => city);
+    res.json(cities);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/island', async () => {
+    const lat = '2.16599'
+    const lon = '100.82514'
+    const island = await getIsland(lat, lon)
+    console.log({island});
+
+    const island2 = await getIslandName(lat, lon)
+    console.log(island2.results[0].locations[0]);
+})
